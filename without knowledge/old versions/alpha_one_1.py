@@ -1,4 +1,5 @@
 #changed animation to _one versions creted 13 nov 2024
+#changed last 26 nov 2024
 import pygame, sys
 
 # Initialize Pygame
@@ -17,13 +18,13 @@ ground_color = (255, 255, 255)
 def load_frames(path, count):
     return [pygame.image.load(f'{path}{i}.png').convert_alpha() for i in range(1, count + 1)]
 
-idle_images = load_frames('images/player/idle/Eluette_idle', 4)
-run_images = load_frames('images/player/run/Eluette_run', 8)
-jump_images = load_frames('images/player/jump/Eluette_jump', 2)
-hit_images = load_frames('images/player/hit/Eluette_hit', 2)
-death_images = load_frames('images/player/death/Eluette_disappear', 4)
-attack_images = load_frames('images/player/attack/Eluette_attack_one', 4)
-shot_images = load_frames('images/player/shot/Eluette_shot_one', 6)  # New shot animation
+idle_images = load_frames('without knowledge/images/player/idle/Eluette_idle', 4)
+run_images = load_frames('without knowledge/images/player/run/Eluette_run', 8)
+jump_images = load_frames('without knowledge/images/player/jump/Eluette_jump', 2)
+hit_images = load_frames('without knowledge/images/player/hit/Eluette_hit', 2)
+death_images = load_frames('without knowledge/images/player/death/Eluette_disappear', 4)
+attack_images = load_frames('without knowledge/images/player/attack/Eluette_attack_one', 4)
+shot_images = load_frames('without knowledge/images/player/shot/Eluette_shot_one', 6)  # New shot animation
 
 # Player properties
 player_image = idle_images[0]
