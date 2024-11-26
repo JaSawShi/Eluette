@@ -5,7 +5,7 @@ from random import randint
 pygame.init()
 pygame.display.set_caption('myturn')
 
-screen_w = 480
+screen_w = 512
 screen_h = 384
 screen = pygame.display.set_mode((screen_w,screen_h))
 player_surface = pygame.Surface((64,64))
