@@ -29,24 +29,24 @@ shot_images = load_frames('without knowledge/images/player/shot/Eluette_shot_one
 # Player properties
 player_image = idle_images[0]
 player_x, player_y = 100, 100
-player_speed_y, player_speed_x = 0, 5
+player_speed_y, player_speed_x = 0, 10
 player_on_ground, jumping, facing_right, hitting, dying, attacking, shooting = False, False, True, False, False, False, False
 
 # Gravity settings
-gravity = 0.5
-jump_power = -20
+gravity = 1.5
+jump_power = -30
 
 # Animation settings
 frame_duration_idle, frame_duration_run, jump_frame_duration, hit_frame_duration = 400, 100, 700, 400
 death_frame_duration = 400
 attack_frame_duration = 100
-shot_frame_duration = 100  # 125 ms per shot frame
+shot_frame_duration = 100
 frame_index_idle, frame_index_run, frame_index_jump, frame_index_hit, frame_index_death, frame_index_attack, frame_index_shot = 0, 0, 0, 0, 0, 0, 0
 last_update_idle, last_update_run, last_update_jump, last_update_hit, last_update_death, last_update_attack, last_update_shot = 0, 0, 0, 0, 0, 0, 0
 hit_start_time, death_start_time, attack_start_time, shot_start_time = 0, 0, 0, 0  # Track start times for animations
 
 # Set FPS
-fps = 60
+fps = 30
 clock = pygame.time.Clock()
 
 # Functions to handle animations
