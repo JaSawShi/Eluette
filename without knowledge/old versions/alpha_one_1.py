@@ -2,15 +2,12 @@
 #changed last 26 nov 2024
 import pygame, sys
 
-# Initialize Pygame
 pygame.init()
 pygame.display.set_caption('Eluette')
 
-# Set up display
 screen_w, screen_h = 1024, 768
 screen = pygame.display.set_mode((screen_w, screen_h))
 
-# Ground properties
 ground_y, ground_height = 704, 64
 ground_color = (255, 255, 255)
 
@@ -97,6 +94,8 @@ while run:
             player_image, frame_index_death, last_update_death = update_animation(
                 death_images, frame_index_death, death_frame_duration, last_update_death
             )
+
+
     elif hitting:
         if current_time - hit_start_time >= 800:
             hitting = False
@@ -104,6 +103,8 @@ while run:
             player_image, frame_index_hit, last_update_hit = update_animation(
                 hit_images, frame_index_hit, hit_frame_duration // len(hit_images), last_update_hit
             )
+
+
     elif attacking:
         if current_time - attack_start_time >= attack_frame_duration * len(attack_images):
             attacking = False
@@ -112,6 +113,8 @@ while run:
             player_image, frame_index_attack, last_update_attack = update_animation(
                 attack_images, frame_index_attack, attack_frame_duration, last_update_attack
             )
+
+
     elif shooting:
         if current_time - shot_start_time >= shot_frame_duration * len(shot_images):
             shooting = False
@@ -120,6 +123,8 @@ while run:
             player_image, frame_index_shot, last_update_shot = update_animation(
                 shot_images, frame_index_shot, shot_frame_duration, last_update_shot
             )
+
+
     elif jumping:
         player_image, frame_index_jump, last_update_jump = update_animation(
             jump_images, frame_index_jump, jump_frame_duration, last_update_jump
@@ -133,7 +138,6 @@ while run:
             idle_images, frame_index_idle, frame_duration_idle, last_update_idle
         )
 
-    # Flip image if moving left
     if not facing_right:
         player_image = pygame.transform.flip(player_image, True, False)
 
@@ -156,22 +160,22 @@ while run:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 run = False
-            elif event.key == pygame.K_e:  # Start hit animation on 'E' key press
+            elif event.key == pygame.K_e:  # Start hit
                 hitting = True
                 frame_index_hit = 0
                 last_update_hit = current_time
                 hit_start_time = current_time
-            elif event.key == pygame.K_r:  # Start death animation on 'R' key press
+            elif event.key == pygame.K_r:  # Start death 
                 dying = True
                 frame_index_death = 0
                 last_update_death = current_time
                 death_start_time = current_time
-            elif event.key == pygame.K_f:  # Start attack animation on 'F' key press
+            elif event.key == pygame.K_f:  # Start attack 
                 attacking = True
                 frame_index_attack = 0
                 last_update_attack = current_time
                 attack_start_time = current_time
-            elif event.key == pygame.K_SPACE:  # Start shot animation on 'SPACE' key press
+            elif event.key == pygame.K_SPACE:  # Start shot 
                 shooting = True
                 frame_index_shot = 0
                 last_update_shot = current_time
