@@ -1,5 +1,6 @@
 from settings import *
 from sprites import *
+from support import *
 
 
 def main():
@@ -10,6 +11,8 @@ def main():
     clock = pygame.time.Clock()
 
     # VARIABLES
+
+    tmx_map = load_pygame(join('data', 'maps', 'world.tmx'))
 
     # Player and platforms
     player = Player(100, 600, display_surf)

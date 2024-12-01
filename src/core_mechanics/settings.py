@@ -1,7 +1,10 @@
 import pygame, sys
 from random import randint
+from os import walk
+from os.path import join
 from pygame.math import Vector2 as vector
 from pygame.locals import *
+from pytmx.util_pygame import load_pygame
 
 s_w = 1024
 s_h = 768
@@ -17,4 +20,4 @@ p_c = (255,255,255)
 
 gravity = 0.8
 jump_strenght = -20
-p_speed = 5
+p_speed = 6
