@@ -71,19 +71,20 @@ def main():
 
 
     for obj in tmx_map.objects:
+        pos = obj.x, obj.y
+        surf = (obj.width, obj.height)
+
         if obj.name == 'player':
-            pos = obj.x, obj.y
-            surf = (obj.width, obj.height)
-            # print(f"Player position: {pos}, size: {surf}")  
-            # player = Player(pos=pos, surf=surf, groups=(sprite_group,camera_group), collision_sprites=collision_group)
             player = Player(pos=pos, surf=surf, groups=(camera_group, sprite_group), collision_sprites=collision_group)
-
         else:
-            pos = obj.x, obj.y
-            surf = (obj.width, obj.height)
-            Object(pos = pos, surf = surf, groups= sprite_group)
+            Object(pos=pos, surf=surf, groups=sprite_group)
 
+    # object_layer = tmx_map.get_layer_by_name('objects')
+    # for obj in object_layer:
+    #     print(obj.x,obj.y,obj.width,obj.height,obj.name)
 
+    # player = collision_group(Player)
+            
     # print("Sprites in sprite_group:")
     # for sprite in sprite_group:
     #     print(sprite, sprite.rect)
@@ -103,15 +104,14 @@ def main():
 
         # player update
         camera_group.update()
-
+        # player.update()
         # draw
+        sprite_group.update()
         sprite_group.draw(screen)
-        camera_group.custom_draw(player)
-
+        # camera_group.custom_draw(player)
 
         pygame.display.update()
         clock.tick(fps)
-
 
     pygame.quit()
     sys.exit()
