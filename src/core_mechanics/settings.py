@@ -14,10 +14,10 @@ fps = 60
 tile_size = 64
 tile_color = (255, 255, 255)
 
-p_w = 56
-p_h = 112
-p_c = (255,255,255)
+# p_w = 56
+# p_h = 112
+# p_c = (255,255,255)
 
-gravity = 0.8
-jump_strenght = -20
-p_speed = 6
+# gravity = 0.5
+# jump_strenght = -20
+# p_speed = 6

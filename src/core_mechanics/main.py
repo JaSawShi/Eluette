@@ -6,31 +6,93 @@ from support import *
 def main():
 
     pygame.init()
-    display_surf = pygame.display.set_mode((s_w, s_h))
+    screen = pygame.display.set_mode((s_w, s_h))
     pygame.display.set_caption('pre-alpha')
     clock = pygame.time.Clock()
 
     # VARIABLES
 
-    tmx_map = load_pygame(join('data', 'maps', 'world.tmx'))
+    tmx_map = load_pygame(join('pa_data', 'tmx', 'pa_map.tmx'))
 
-    # Player and platforms
-    player = Player(100, 600, display_surf)
-    platforms = [
-        Platform(0, 704, display_surf),
-        Platform(64, 704, display_surf),
-        Platform(128, 704, display_surf),
-        Platform(192, 704, display_surf),
-        Platform(512, 640, display_surf),
-        Platform(576, 384, display_surf)
-    ]
+    lvl_w = tmx_map.width * tile_size
+    lvl_h = tmx_map.height * tile_size
 
+    class Tile(pygame.sprite.Sprite):
+        def __init__(self, pos, surf, groups):
+            super().__init__(groups)
+            self.image = surf
+            self.rect = self.image.get_rect(topleft=pos)
+
+    class Object(pygame.sprite.Sprite):
+        def __init__(self, pos, surf, groups):
+            super().__init__(groups)
+            self.image = pygame.Surface(surf)
+            self.image.fill((255,255,255))
+            self.rect = self.image.get_rect(topleft=pos)
+
+    class Camera(pygame.sprite.Group):
+        def __init__(self):
+            super().__init__()
+            self.display_surface = pygame.display.get_surface()
+            self.offset = pygame.math.Vector2()
+            self.half_w = self.display_surface.get_size()[0] // 2
+            self.half_h = self.display_surface.get_size()[1] // 2
+
+        def center_target_camera(self, target):
+            self.offset.x = target.rect.centerx - self.half_w
+            self.offset.y = target.rect.centery - self.half_h
+
+        def custom_draw(self, player):
+            self.center_target_camera(player)
+
+            for sprite in sorted(self.sprites(), key=lambda spr: spr.rect.centery):
+                offset_pos = sprite.rect.topleft - self.offset
+                self.display_surface.blit(sprite.image, offset_pos)
+
+
+
+    camera_group = Camera()
+    sprite_group = pygame.sprite.Group()
+    collision_group = pygame.sprite.Group()
+
+
+    for layer in tmx_map.layers:
+        if layer.name in ('ground'):
+            for x,y,surf in layer.tiles():
+                pos = (x * 64, y * 64)
+                Tile(pos = pos, surf = surf, groups = (sprite_group, collision_group))
+
+
+    for layer in tmx_map.layers:
+        if layer.name in ('patrol', 'attack'):
+            for x,y,surf in layer.tiles():
+                pos = (x * 64, y * 64)
+                Tile(pos = pos, surf = surf, groups = sprite_group)
+
+
+    for obj in tmx_map.objects:
+        if obj.name == 'player':
+            pos = obj.x, obj.y
+            surf = (obj.width, obj.height)
+            # print(f"Player position: {pos}, size: {surf}")  
+            # player = Player(pos=pos, surf=surf, groups=(sprite_group,camera_group), collision_sprites=collision_group)
+            player = Player(pos=pos, surf=surf, groups=(camera_group, sprite_group), collision_sprites=collision_group)
+
+        else:
+            pos = obj.x, obj.y
+            surf = (obj.width, obj.height)
+            Object(pos = pos, surf = surf, groups= sprite_group)
+
+
+    # print("Sprites in sprite_group:")
+    # for sprite in sprite_group:
+    #     print(sprite, sprite.rect)
 
     # THE LOOP
 
     run = True
     while run:
-        display_surf.fill(bg_color)
+        screen.fill(bg_color)
         keys = pygame.key.get_pressed()
 
         for event in pygame.event.get():
@@ -40,14 +102,16 @@ def main():
                 run = False
 
         # player update
-        player.move(keys, platforms)
+        camera_group.update()
 
         # draw
-        player.draw()
-        for platform in platforms: platform.draw()
+        sprite_group.draw(screen)
+        camera_group.custom_draw(player)
+
 
         pygame.display.update()
         clock.tick(fps)
+
 
     pygame.quit()
     sys.exit()
