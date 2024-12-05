@@ -16,27 +16,24 @@ class Game:
         # groups 
         self.all_sprites = All_sprites()
         self.collision_sprites = pygame.sprite.Group()
-
-        # self.target_groups = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
+        
 
         # load game
         self.load_assets()
         self.setup()
 
         # timers
-        self.func_timer = Timer(2000, func = self.some_func)
+        # self.func_timer = Timer(2000, func = self.some_func)
         # self.func_timer = Timer(2000, func = self.some_func, repeat=True, autostart=True)
-        self.func_timer.activate() #if autostart this line is not need
+        # self.func_timer.activate() #if autostart this line is not need
     
-    def some_func(self):
-        Spike((randint(300,600),randint(300,600)), (64,64), self.all_sprites)
-
+    # def some_func(self):
+    #     Spike((randint(300,600),randint(300,600)), (64,64), (self.all_sprites, self.enemy_group))
 
     def load_assets(self):
         # graphics
-        self.worm_frames = import_folder('images', 'enemies', 'worm')
-        #surf
-        self.attack_surf = pygame.Surface((64,64))
+        self.worm_frames = import_folder('images', 'enemies', 'worm') # just check it works 
 
 
     def setup(self):
@@ -45,10 +42,13 @@ class Game:
         patrol_layer = tmx_map.get_layer_by_name('patrol')
         attack_layer = tmx_map.get_layer_by_name('attack')
         objects_layer = tmx_map.get_layer_by_name('objects')
+        
         # for tile in ground_layer:
         #     if tile[2] == 4: 
         #         print(tile)
-        # self.demo_target_surf = Enemy((320,640), (128,128), self.all_sprites)
+
+        self.enemy = Enemy((300, 600), (64, 64), (self.all_sprites, self.enemy_group))
+        self.enemy2 = Enemy((500, 650), (64, 64), (self.all_sprites, self.enemy_group))
 
         for x,y, image in ground_layer.tiles():
             Sprite((x*t_s,y*t_s),image,(self.all_sprites, self.collision_sprites)) 
@@ -62,10 +62,12 @@ class Game:
         for obj in objects_layer:
             if obj.name == 'player':
                 self.player = Player((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites), self.collision_sprites)
+                self.player_group = pygame.sprite.GroupSingle(self.player)
             elif obj.name == 'spike':
-                Spike((obj.x, obj.y),(obj.width, obj.height), self.all_sprites)
-
+                Spike((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites, self.enemy_group),self.player_group)
     
+
+
 
     def run(self):
         while self.running:
@@ -74,14 +76,17 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                    self.running = False 
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        self.running = False 
+                    if event.key == pygame.K_p:
+                            self.player.attack(self.enemy_group)
+
             
 
 
             # update
-            self.func_timer.update()
-            # self.player.update(dt, target=self.demo_target_surf)
+            # self.func_timer.update()
             self.all_sprites.update(dt)
 
             # something like respawn
