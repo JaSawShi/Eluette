@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="64" height="36" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="24">
- <tileset firstgid="1" source="../../../../Documents/GitHub/Eluette/pa_data/tsx/pa_tiles.tsx"/>
- <tileset firstgid="9" source="../../../../Documents/GitHub/Eluette/pa_data/tsx/pa_entities.tsx"/>
+ <tileset firstgid="1" source="/Users/amirkarataev/Documents/GitHub/Eluette/pa_data/tsx/pa_tiles.tsx"/>
+ <tileset firstgid="9" source="/Users/amirkarataev/Documents/GitHub/Eluette/pa_data/tsx/pa_entities.tsx"/>
  <layer id="1" name="bg" width="64" height="36">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,

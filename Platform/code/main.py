@@ -17,7 +17,7 @@ class Game:
         self.all_sprites = All_sprites()
         self.collision_sprites = pygame.sprite.Group()
 
-        self.target_groups = pygame.sprite.Group()
+        # self.target_groups = pygame.sprite.Group()
 
         # load game
         self.load_assets()
@@ -40,7 +40,7 @@ class Game:
 
 
     def setup(self):
-        tmx_map = load_pygame(join('data','maps','pa_map.tmx'))
+        tmx_map = load_pygame(join('PLatform','data','maps','pa_map.tmx'))
         ground_layer = tmx_map.get_layer_by_name('ground')
         patrol_layer = tmx_map.get_layer_by_name('patrol')
         attack_layer = tmx_map.get_layer_by_name('attack')
@@ -48,7 +48,7 @@ class Game:
         # for tile in ground_layer:
         #     if tile[2] == 4: 
         #         print(tile)
-        self.demo_target_surf = Enemy((320,640), (128,128), self.all_sprites, self.target_groups)
+        # self.demo_target_surf = Enemy((320,640), (128,128), self.all_sprites)
 
         for x,y, image in ground_layer.tiles():
             Sprite((x*t_s,y*t_s),image,(self.all_sprites, self.collision_sprites)) 
@@ -61,9 +61,9 @@ class Game:
 
         for obj in objects_layer:
             if obj.name == 'player':
-                self.player = Player((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites), self.collision_sprites, target=self.demo_target_surf)
+                self.player = Player((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites), self.collision_sprites)
             elif obj.name == 'spike':
-                Spike((obj.x, obj.y),(obj.width, obj.height), self.all_sprites, self.target_groups)
+                Spike((obj.x, obj.y),(obj.width, obj.height), self.all_sprites)
 
     
 
@@ -82,11 +82,11 @@ class Game:
             # update
             self.func_timer.update()
             # self.player.update(dt, target=self.demo_target_surf)
-            self.all_sprites.update(dt,self.demo_target_surf)
+            self.all_sprites.update(dt)
 
             # something like respawn
-            # if self.player not in self.all_sprites:
-            #     self.setup()
+            if self.player not in self.all_sprites:
+                self.setup()
 
             # draw 
             self.screen.fill(bg)

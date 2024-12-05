@@ -9,7 +9,7 @@ class Sprite(pygame.sprite.Sprite):
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, size, groups, collision_sprites, target):
+    def __init__(self, pos, size, groups, collision_sprites):
         super().__init__(groups)
         self.image = pygame.Surface(size)  
         self.image.fill((255, 255, 255))  
@@ -22,10 +22,10 @@ class Player(pygame.sprite.Sprite):
         self.on_floor = False
 
         self.attack_timer = Timer(400)  
-        self.target = target 
+        # self.target = target 
         
 
-    def input(self, target):
+    def input(self):
         keys = pygame.key.get_pressed()
         self.direction.x = int(keys[pygame.K_d]) - int(keys[pygame.K_a])
 
@@ -33,7 +33,7 @@ class Player(pygame.sprite.Sprite):
             self.direction.y = - 20
         
         if keys[pygame.K_p] and not self.attack_timer:
-            self.attack(target)
+            self.attack()
             self.attack_timer.activate()
             
 
@@ -65,30 +65,30 @@ class Player(pygame.sprite.Sprite):
         if self.rect.y >= 2560:
             self.kill()
 
-    def attack(self, target):
+    def attack(self):
         self.attacking_rect = pygame.Rect(self.rect.centerx, self.rect.y, 128, self.rect.height)
         print('attacking rect was created')
-        if self.attacking_rect.colliderect(self.target.rect):
-            print('attacking rect collide with target')
+        # if self.attacking_rect.colliderect(self.target.rect):
+        #     print('attacking rect collide with target')
 
 
-    def update(self, dt, target):
+    def update(self, dt):
         self.check_floor()
-        self.input(target)
+        self.input()
         self.move(dt)
         self.check_death_conditions()
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos, size, groups, target_groups):
+    def __init__(self, pos, size, groups):
         super().__init__(groups)
         self.image = pygame.Surface(size)  
         self.image.fill((255, 255, 255))  
         self.rect = self.image.get_rect(topleft=pos)
         
-        self.target_groups = target_groups
+        # self.target_groups = target_groups
 
 
 class Spike(Enemy):
-    def __init__(self, pos, size, groups, target_groups):
-        super().__init__(pos, size, groups, target_groups)
+    def __init__(self, pos, size, groups):
+        super().__init__(pos, size, groups)
