@@ -153,68 +153,73 @@ class Attack:
             if self.attacking_rect.colliderect(target.rect):
                 target.take_damage(self.damage)
                 print(f"{target} takes {self.damage} damage!")
-
+                
 class SpikeAttack(Attack):
     def __init__(self, source, target_group, damage, trigger_distance):
         super().__init__(source, target_group, damage, facing=None)
         self.trigger_distance = trigger_distance
         self.area_active = False  # area of attack not active by defolt
         self.cooldown_active = False  # cooldown also
+        self.damage_dealt = False  # damage has not been wonded
 
         # timers
-        self.area_timer = Timer(500) 
-        self.cooldown_timer = Timer(2000)  
+        self.area_timer = Timer(500)
+        self.cooldown_timer = Timer(2000)
 
-    # check players distance
+    # trigger rect
     def is_player_in_range(self):
-        for target in self.target_group:
-            distance_x = abs(target.rect.centerx - self.source.rect.centerx)
-            distance_y = abs(target.rect.centery - self.source.rect.centery)
+        # create trigger rect
+        trigger_rect = pygame.Rect(
+            self.source.rect.centerx - t_s * 2.5,  # center by horizontal
+            self.source.rect.centery - t_s // 2,  # center by vertical
+            t_s * 5,  # range 4 toiles
+            t_s  # 1 tile height
+        )
 
-            if distance_x <= self.trigger_distance and distance_y <= t_s:
+        # check player in trigger rect
+        for target in self.target_group:
+            if trigger_rect.colliderect(target.rect):
                 return target
         return None
 
-    # attack section
+    # attack start
     def execute(self):
         # if area and cooldown are not active start attack
         if not self.area_active and not self.cooldown_active:
             target = self.is_player_in_range()
             if target:
+                print("attack zone is active!")
                 self.attacking_rect = pygame.Rect(
                     self.source.rect.centerx - self.source.rect.width // 2,
                     self.source.rect.top - t_s * 2,
                     self.source.rect.width,
                     t_s * 2
                 )
-
-                if self.attacking_rect.colliderect(target.rect):
-                    target.take_damage(self.damage)
-                    print(f"{target} takes {self.damage} damage!")
-
-                self.area_active = True  # attack area active
+                self.area_active = True  # activate zone 
+                self.damage_dealt = False  # reset flag
                 self.area_timer.activate()  # attack timer active
 
+    # update state
     def update(self, dt):
-        # update timers
+        # timers update
         self.area_timer.update()
         self.cooldown_timer.update()
 
-        # turn off area of attaking after timer ends 
+        # deactivate area of attaking after timers end
         if self.area_active and not self.area_timer.active:
             self.area_active = False
             self.cooldown_active = True  # turn on colldown timer
             self.cooldown_timer.activate()  # start cooldown timer
+            print("Cooldown!")
 
         # turn off colldown timer after ending of time
         if self.cooldown_active and not self.cooldown_timer.active:
             self.cooldown_active = False
 
-        # if area is active check is there player nearby
-        if self.area_active:
+        # if area is active check is there player nearby 
+        if self.area_active and not self.damage_dealt:
             for target in self.target_group:
                 if self.attacking_rect.colliderect(target.rect):
-                    # is in attacking area
-                    print(f"{target} is in the attack area!")
-
-
+                    target.take_damage(self.damage)
+                    self.damage_dealt = True  # damage was takken
+                    print(f"{target} is get {self.damage} damage")
