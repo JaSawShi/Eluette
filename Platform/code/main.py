@@ -47,6 +47,10 @@ class Game:
         #     if tile[2] == 4: 
         #         print(tile)
 
+        for obj in objects_layer:
+            if obj.name == 'walker': 
+                print(obj.x,obj.y)
+
         self.enemy = Enemy((300, 600), (64, 64), (self.all_sprites, self.enemy_group))
         self.enemy2 = Enemy((500, 650), (64, 64), (self.all_sprites, self.enemy_group))
 
@@ -95,7 +99,7 @@ class Game:
 
             # draw 
             self.screen.fill(bg)
-            self.all_sprites.draw(self.player.rect.topleft)
+            self.all_sprites.draw(self.player.rect.center)
             pygame.display.update()
         
         pygame.quit()
