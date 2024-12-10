@@ -47,9 +47,13 @@ class Game:
         #     if tile[2] == 4: 
         #         print(tile)
 
-        for obj in objects_layer:
-            if obj.name == 'walker': 
-                print(obj.x,obj.y)
+        # for obj in objects_layer:
+        #     if obj.name == 'walker': 
+        #         print(obj.x,obj.y)
+
+        # for obj in objects_layer:
+        #     if obj.name == 'runner': 
+        #         print(obj.x,obj.y)
 
         self.enemy = Enemy((300, 600), (64, 64), (self.all_sprites, self.enemy_group))
         self.enemy2 = Enemy((500, 650), (64, 64), (self.all_sprites, self.enemy_group))
@@ -65,10 +69,33 @@ class Game:
 
         for obj in objects_layer:
             if obj.name == 'player':
-                self.player = Player((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites), self.collision_sprites)
+                self.player = Player((obj.x, obj.y), (obj.width, obj.height), (self.all_sprites), self.collision_sprites)
                 self.player_group = pygame.sprite.GroupSingle(self.player)
             elif obj.name == 'spike':
-                Spike((obj.x, obj.y),(obj.width, obj.height), (self.all_sprites, self.enemy_group),self.player_group)
+                Spike((obj.x, obj.y), (obj.width, obj.height), (self.all_sprites, self.enemy_group), self.player_group)
+        
+        for obj in objects_layer:
+            if obj.name == 'walker': 
+                Walker(
+                    pos=(obj.x, obj.y+16),
+                    size=(obj.width, obj.height),
+                    groups=(self.all_sprites, self.enemy_group),  # add to enemy_group
+                    target_group = self.player_group,  # add player_group to trigger attack
+                    speed=2,
+                    move_area_width=t_s * 8
+                )
+            elif obj.name == 'runner':
+                Runner(
+                    (obj.x, obj.y), 
+                    (obj.width, obj.height), 
+                    (self.all_sprites, self.enemy_group), 
+                    self.player_group, 
+                    self.collision_sprites,
+                    6,
+                    t_s*16
+                    )
+
+
     
 
 
@@ -85,8 +112,7 @@ class Game:
                         self.running = False 
                     if event.key == pygame.K_p:
                             self.player.attack(self.enemy_group)
-
-            
+                                   
 
 
             # update

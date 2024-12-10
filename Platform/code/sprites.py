@@ -149,6 +149,7 @@ class Attack:
             )
     
     def execute(self):
+        print('attack was dealt!')
         for target in self.target_group:
             if self.attacking_rect.colliderect(target.rect):
                 target.take_damage(self.damage)
@@ -223,3 +224,253 @@ class SpikeAttack(Attack):
                     target.take_damage(self.damage)
                     self.damage_dealt = True  # damage was takken
                     print(f"{target} is get {self.damage} damage")
+
+class Walker(Enemy):
+    def __init__(self, pos, size, groups, speed, move_area_width, target_group):
+        super().__init__(pos, size, groups)
+        self.health = 2  
+        self.speed = speed
+        self.move_area_width = move_area_width
+        self.target_group = target_group
+
+
+        # patrol zone
+        self.move_area = pygame.Rect(
+            self.rect.centerx - self.move_area_width // 2,
+            self.rect.centery - t_s // 2,
+            self.move_area_width,
+            t_s
+        )
+
+        # state settings
+        self.direction = 1  # 1 = right, -1 = left
+        self.trigger_distance = t_s * 1
+        self.preparing_to_attack = False
+        self.attacking = False
+        self.on_cooldown = False
+
+        # timers
+        self.prepare_timer = Timer(500)  # prepare to attack time (0.5sec)
+        self.attack_timer = Timer(500)  # attack time (0.5sec)
+        self.cooldown_timer = Timer(1000)  # cooldown (1sec)
+
+        # for example
+        # self.prepare_timer = Timer(2500)  
+        # self.attack_timer = Timer(2500)  
+        # self.cooldown_timer = Timer(5000)  
+
+        # attack
+        self.attack = WalkerAttack(self, self.target_group, damage=1)
+
+    def move(self):
+        # Moves only when not attacking, not on cooldown, and not preparing to attack.
+        if not self.preparing_to_attack and not self.attacking and not self.on_cooldown:
+            self.rect.x += self.speed * self.direction
+            if self.rect.left < self.move_area.left or self.rect.right > self.move_area.right:
+                self.direction *= -1
+
+    def check_trigger_area(self):
+        # check trigger zone
+        trigger_rect = pygame.Rect(
+            self.rect.right if self.direction == 1 else self.rect.left - self.trigger_distance,
+            self.rect.top,
+            self.trigger_distance,
+            t_s
+        )
+        for target in self.target_group:
+            if trigger_rect.colliderect(target.rect):
+                return True
+        return False
+
+    def update(self, dt):
+        # timers update
+        self.prepare_timer.update()
+        self.attack_timer.update()
+        self.cooldown_timer.update()
+
+        # If the player is in the trigger zone and Walker is not ready to attack, not attacking, and not on cooldown
+        if self.check_trigger_area() and not self.preparing_to_attack and not self.attacking and not self.on_cooldown:
+            self.preparing_to_attack = True
+            self.prepare_timer.activate()
+            print('in trigger zone')
+
+        # If the preparation timer has expired
+        if self.preparing_to_attack and not self.prepare_timer.active:
+            self.preparing_to_attack = False
+            self.attacking = True
+            self.attack_timer.activate()
+            print('attack zone created')
+
+        # If the attack timer has expired
+        if self.attacking and not self.attack_timer.active:
+            self.attacking = False
+            self.on_cooldown = True
+            self.cooldown_timer.activate()
+            print('cooldown start')
+
+        # If the cooldown has ended
+        if self.on_cooldown and not self.cooldown_timer.active:
+            self.on_cooldown = False
+            print('cooldown ends')
+
+        # attack execution
+        if self.attacking:
+            self.attack.execute()
+
+        # move
+        self.move()
+
+        # attack update
+        self.attack.update(dt)
+
+
+class WalkerAttack(Attack):
+    def __init__(self, source, target_group, damage):
+        super().__init__(source, target_group, damage, facing=None)
+        self.area_active = False
+
+        # attack range exist timer
+        self.area_timer = Timer(500) 
+
+        # for example
+        # self.area_timer = Timer(2500) 
+
+    def execute(self):
+        if not self.area_active:
+            # Create an attack area depending on the direction
+            self.attacking_rect = pygame.Rect(
+                self.source.rect.right if self.source.direction == 1 else self.source.rect.left - t_s * 2,
+                self.source.rect.top,
+                t_s * 2,
+                t_s
+            )
+            self.area_active = True
+            self.area_timer.activate()
+
+            # Deal damage to the player if he is in the attack area
+            for target in self.target_group:
+                if self.attacking_rect.colliderect(target.rect):
+                    target.take_damage(self.damage)
+                    print(f"{target} получил {self.damage} урона!")
+
+    def update(self, dt):
+        self.area_timer.update()
+        if self.area_active and not self.area_timer.active:
+            self.area_active = False
+
+
+class Runner(Walker):
+    def __init__(self, pos, size, groups, player_group, collision_sprites, speed, move_area_width):
+        super().__init__(pos, size, groups, speed, move_area_width, player_group)
+        self.chase_delay_timer = Timer(500)  # 500 ms delay before starting chase
+        self.chasing = False  # Is the Runner chasing the player
+        self.returning = False  # Is the Runner returning to its start position
+        self.start_position = pos  # Runner's initial position
+        self.collision_sprites = collision_sprites  # Sprites to check collision
+        self.base_speed = speed  # Base speed
+        self.chase_speed = speed * 1.5  # Increased speed during chase (1.5x)
+
+    def player_in_trigger_zone(self):
+        """Check if the player is within the Runner's trigger zone."""
+        trigger_rect = pygame.Rect(
+            self.rect.centerx - t_s * 3,  # Larger horizontal detection area
+            self.rect.centery - t_s // 2,  # Center vertically
+            t_s * 6,  # Range of 6 tiles horizontally
+            t_s  # 1 tile height
+        )
+        for player in self.target_group:
+            if trigger_rect.colliderect(player.rect):
+                return player
+        return None
+
+    def get_player(self):
+        """Return the player object if in range, otherwise None."""
+        return self.player_in_trigger_zone()
+
+    def move_towards_player(self, player):
+        """Move towards the player's position."""
+        if player.rect.centerx > self.rect.centerx:
+            self.rect.x += self.speed
+        elif player.rect.centerx < self.rect.centerx:
+            self.rect.x -= self.speed
+
+    def move_towards_position(self, position):
+        """Move towards a specific position."""
+        if position[0] > self.rect.centerx:
+            self.rect.x += self.speed
+        elif position[0] < self.rect.centerx:
+            self.rect.x -= self.speed
+
+    def update(self, dt):
+        super().update(dt)
+        self.chase_delay_timer.update()
+
+        # Check for player in trigger zone
+        player = self.get_player()
+        if player and not self.chasing and not self.chase_delay_timer.active:
+            self.chase_delay_timer.activate()
+            print("Runner is preparing to chase...")
+        elif player and self.chase_delay_timer.active and not self.chase_delay_timer.active:
+            self.chasing = True
+            self.returning = False
+            self.speed = self.chase_speed  # Increase speed during chase
+            print("Runner starts chasing the player!")
+
+        # Chase the player if in range
+        if self.chasing and player:
+            self.move_towards_player(player)
+        elif self.chasing and not player:
+            # Stop chasing and return to start position
+            self.chasing = False
+            self.returning = True
+            self.speed = self.base_speed  # Reset speed when not chasing
+            print("Runner lost the player and will return!")
+
+        # Return to the start position
+        if self.returning:
+            if (self.rect.centerx, self.rect.centery) != self.start_position:
+                self.move_towards_position(self.start_position)
+            else:
+                self.returning = False
+                print("Runner returned to start position!")
+
+
+
+
+class RunnerAttack(Attack):
+    def __init__(self, source, target_group, damage, facing, attack_delay=500):
+        super().__init__(source, target_group, damage, facing)
+        self.attack_delay_timer = Timer(attack_delay)  # Задержка перед атакой (500 мс)
+        self.attack_active_timer = Timer(500)  # Активная зона урона (500 мс)
+        self.cooldown_timer = Timer(1000)  # Кулдаун после атаки (1 секунда)
+        self.state = "idle"  # idle -> preparing -> attacking -> cooldown
+
+    def execute(self):
+        if self.state == "idle":
+            self.state = "preparing"
+            self.attack_delay_timer.activate()
+            print("Runner is preparing to attack...")
+
+    def update(self, dt):
+        self.attack_delay_timer.update()
+        self.attack_active_timer.update()
+        self.cooldown_timer.update()
+
+        if self.state == "preparing" and not self.attack_delay_timer.active:
+            self.state = "attacking"
+            self.attack_active_timer.activate()
+            print("Runner attack area activated!")
+
+        if self.state == "attacking":
+            for target in self.target_group:
+                if self.attacking_rect.colliderect(target.rect):
+                    target.take_damage(self.damage)
+                    print(f"Player takes {self.damage} damage!")
+            if not self.attack_active_timer.active:
+                self.state = "cooldown"
+                self.cooldown_timer.activate()
+                print("Runner is cooling down...")
+
+        if self.state == "cooldown" and not self.cooldown_timer.active:
+            self.state = "idle"
+            print("Runner is ready again.")
